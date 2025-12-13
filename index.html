@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>安平記憶地圖：時空解謎</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <div id="map-container">
+        <div class="map-title">
+            <h1>記憶地圖</h1>
+            <p>點擊碎片，進入被遺忘的歷史</p>
+        </div>
+        <div class="map-grid">
+            <div style="grid-column: 2;" class="map-piece" id="pin-fort">海山館</div>
+            <div class="map-piece" id="pin-street">文朱殿</div>
+            <div class="map-piece" id="pin-treehouse">考古埕</div>
+            <div class="map-piece" id="pin-tait">劍獅</div>
+            <div style="grid-column: 2;" class="map-piece" id="pin-sunset">妙壽宮</div>
+        </div>
+        <button class="btn-retro" style="margin-top: 30px;" onclick="GameManager.resetProgress()">重置進度 (Debug)</button>
+    </div>
+
+    <div id="game-view" class="hidden">
+        <div id="canvas-container"></div>
+        <div id="game-ui">
+            <div class="ui-top">
+                <button class="btn-retro" onclick="GameManager.backToMap()">← 回地圖 / Map</button>
+                <h2 id="level-title" style="margin-top:10px; color: var(--primary-color);"></h2>
+            </div>
+
+            <div class="ui-bottom">
+                <div class="puzzle-panel">
+                    <div class="puzzle-text-group">
+                        <h3 id="puzzle-text-zh" class="text-zh">載入中...</h3>
+                        <p id="puzzle-text-en" class="text-en">Loading...</p>
+                    </div>
+
+                    <div class="audio-controls">
+                        <button class="btn-retro" style="font-size: 12px;" onclick="AudioManager.playVoice('zh')">🔊
+                            中文導讀</button>
+                        <button class="btn-retro" style="font-size: 12px;" onclick="AudioManager.playVoice('en')">🔊
+                            English</button>
+                    </div>
+
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button id="btn-start-minigame" class="btn-retro"
+                            style="width: 100%; border-color: #fff; color: #fff;">
+                            🧩 尋找線索 / Investigate
+                        </button>
+                    </div>
+
+                    <div class="input-group">
+                        <input type="text" id="puzzle-answer" placeholder="輸入獲得的密碼...">
+                        <button class="btn-retro" onclick="GameManager.submitAnswer()">解鎖</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="minigame-overlay" class="hidden">
+        <div class="minigame-box" id="minigame-content">
+            <span class="close-btn" onclick="MiniGameManager.close()">×</span>
+            <div id="game-dynamic-area"
+                style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            </div>
+        </div>
+        <p style="margin-top: 10px; color: #aaa;">完成小遊戲以獲取密碼</p>
+    </div>
+
+    <video id="video-player" loop crossOrigin="anonymous" playsinline style="display:none;">
+        <source src="" type="video/mp4">
+    </video>
+
+    <!-- Background Music -->
+    <audio id="bg-music" loop>
+        <source src="assets/Whispers in the Fog.mp3" type="audio/mpeg">
+    </audio>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="js/game.js"></script>
+</body>
+
+</html>
