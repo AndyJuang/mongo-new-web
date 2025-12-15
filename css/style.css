@@ -174,8 +174,8 @@ body {
     border-left: 3px solid var(--primary-color);
     padding: 30px;
     margin-bottom: 0;
-    max-width: 800px;
-    /* Much wider */
+    max-width: 1000px;
+    /* Enhanced width for success screen */
     width: 95%;
     pointer-events: auto;
     /* Removed max-height and overflow-y to prevent internal scrollbar */

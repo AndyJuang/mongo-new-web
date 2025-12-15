@@ -81,6 +81,37 @@ window.GameManager = {
         });
     },
 
+    renderDefaultPuzzleUI() {
+        // Reset puzzle panel to default state
+        const panel = document.querySelector('.puzzle-panel');
+        if (!panel) return;
+        panel.innerHTML = `
+            <div class="puzzle-text-group">
+                <h3 id="puzzle-text-zh" class="text-zh">載入中...</h3>
+                <p id="puzzle-text-en" class="text-en">Loading...</p>
+            </div>
+
+            <div class="audio-controls">
+                <button class="btn-retro" style="font-size: 12px;" onclick="AudioManager.playVoice('zh')">🔊
+                    中文導讀</button>
+                <button class="btn-retro" style="font-size: 12px;" onclick="AudioManager.playVoice('en')">🔊
+                    English</button>
+            </div>
+
+            <div style="margin-top: 15px; text-align: center;">
+                <button id="btn-start-minigame" class="btn-retro"
+                    style="width: 100%; border-color: #fff; color: #fff;">
+                    🧩 尋找線索 / Investigate
+                </button>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="puzzle-answer" placeholder="輸入獲得的密碼...">
+                <button class="btn-retro" onclick="GameManager.submitAnswer()">解鎖</button>
+            </div>
+        `;
+    },
+
     enterLevel(id) {
         this.currentLocationId = id;
         const data = LOCATIONS[id];
@@ -88,6 +119,9 @@ window.GameManager = {
         // Remove any existing missing overlay
         const existingOverlay = document.getElementById('missing-video-overlay');
         if (existingOverlay) existingOverlay.remove();
+
+        // Reset UI Structure
+        this.renderDefaultPuzzleUI();
 
         // UI Switch
         document.getElementById('map-container').classList.add('hidden');
@@ -125,12 +159,66 @@ window.GameManager = {
         const data = LOCATIONS[this.currentLocationId];
 
         if (input.toUpperCase() === data.puzzle.answer.toUpperCase()) {
-            alert(`✅ 正確！\n${data.puzzle.successMsg}`);
+
+            // Save Progress
             if (!this.state.cleared.includes(this.currentLocationId)) {
                 this.state.cleared.push(this.currentLocationId);
                 localStorage.setItem('anping_save', JSON.stringify(this.state));
             }
-            this.backToMap();
+
+            // Show Success UI
+            if (data.successStory) {
+                // Support both string (old format) and object (new bilingual format)
+                let textZh = "";
+                let textEn = "";
+
+                if (typeof data.successStory === 'string') {
+                    textZh = data.successStory;
+                } else {
+                    textZh = data.successStory.zh;
+                    textEn = data.successStory.en;
+                }
+
+                const panel = document.querySelector('.puzzle-panel');
+                // Temporarily ensure scrollbar is hidden visually but functional
+                panel.style.scrollbarWidth = 'none'; // Firefox
+                panel.style.msOverflowStyle = 'none';  // IE 10+
+
+                panel.innerHTML = `
+                    <style>
+                        .puzzle-panel::-webkit-scrollbar { display: none; }
+                        .story-scroll-container::-webkit-scrollbar { display: none; }
+                        .story-scroll-container {
+                            max-height: 85vh; overflow-y: scroll; scrollbar-width: none; ms-overflow-style: none; padding-right: 10px;
+                        }
+                    </style>
+                    <div class="success-story" style="animation: fadeIn 0.5s;">
+                        <h3 style="color: gold; margin-bottom: 20px; border-bottom: 1px solid gold; padding-bottom: 10px;">
+                            🎉 解謎成功 / Mission Completed
+                        </h3>
+                        
+                        <div class="audio-controls" style="justify-content: center; margin-bottom: 15px;">
+                            <button class="btn-retro" style="font-size: 12px;" onclick="AudioManager.playSuccessVoice('zh')">🔊 中文 </button>
+                            <button class="btn-retro" style="font-size: 12px;" onclick="AudioManager.playSuccessVoice('en')">🔊 English</button>
+                        </div>
+
+                        <div class="story-scroll-container">
+                            <div class="story-text" style="font-size: 1rem; line-height: 1.8; color: #fff; margin-bottom: 20px;">
+                                <div style="white-space: pre-wrap; margin-bottom: 20px;">${textZh}</div>
+                                ${textEn ? `<div style="white-space: pre-wrap; color: #aaa; font-style: italic; border-top: 1px dashed #555; padding-top: 15px;">${textEn}</div>` : ''}
+                            </div>
+                        </div>
+
+                        <button class="btn-retro" style="width: 100%; margin-top: 15px;" onclick="GameManager.backToMap()">
+                            ↩ 返回地圖 / Back to Map
+                        </button>
+                    </div>
+                `;
+            } else {
+                alert(`✅ 正確！\n${data.puzzle.successMsg}`);
+                this.backToMap();
+            }
+
         } else {
             alert("❌ 答案錯誤，請再試一次 (或是檢查小遊戲獲得的線索)");
         }
@@ -176,20 +264,14 @@ window.AudioManager = {
         }
     },
 
-    playVoice(lang) {
-        const id = GameManager.currentLocationId;
-        if (!id) return;
-
-        // Cancel any ongoing speech
-        window.speechSynthesis.cancel();
-
-        const data = LOCATIONS[id];
-        const text = lang === 'zh' ? data.puzzle.zh : data.puzzle.en;
-
+    speak(text, lang) {
         if (!text) {
             alert("沒有可朗讀的文字 / No text to read");
             return;
         }
+
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
 
@@ -244,6 +326,33 @@ window.AudioManager = {
         };
 
         window.speechSynthesis.speak(utterance);
+    },
+
+    playVoice(lang) {
+        const id = GameManager.currentLocationId;
+        if (!id) return;
+
+        const data = LOCATIONS[id];
+        const text = lang === 'zh' ? data.puzzle.zh : data.puzzle.en;
+        this.speak(text, lang);
+    },
+
+    playSuccessVoice(lang) {
+        const id = GameManager.currentLocationId;
+        if (!id) return;
+
+        const data = LOCATIONS[id];
+        if (!data.successStory) return;
+
+        let text = "";
+        if (typeof data.successStory === 'string') {
+            // Fallback for old simple string format, assume 'zh' if requesting zh, else try to use same string (or empty)
+            text = (lang === 'zh') ? data.successStory : "";
+        } else {
+            text = lang === 'zh' ? data.successStory.zh : data.successStory.en;
+        }
+
+        this.speak(text, lang);
     },
 
     stop() {

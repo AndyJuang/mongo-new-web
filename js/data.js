@@ -32,6 +32,34 @@ Lost in thought, the man brushes past you. You lock eyes for a second, but he le
             answer: "1624",
             successMsg: "文書拼湊完成，歷史的開端是 1624。"
         },
+        successStory: {
+            zh: `你大概拼湊出發生了什麼事。
+
+這個突然出現在你眼前的男人，叫做 何斌。
+他是安平一帶的重要通譯，負責在不同族群之間傳話、協調事情，原本應該是個很難被忽視的人。
+但現在，他正在逃。
+
+從屋內散落的書信與告示來看，盯上他的可不是什麼私人糾紛，而是 荷蘭東印度公司(VOC)那個在當時掌控港口、貿易，甚至能左右一個人命運的龐大勢力。
+你回想起歷史課本，何斌當時正在幫荷蘭東印度公司，後來好像因為有債務問題所以反目，看起來好像是這件事情。
+
+但奇怪的是，他明明不是這個時代的人，卻真的出現在你眼前，而且正往市鎮外的方向離開。
+你心裡浮現一個念頭：如果就這樣放他走，也許你永遠不會知道事情的真相。
+
+於是，你決定跟上去看看。`,
+            en: `You roughly piece together what has happened.
+
+The man who appeared suddenly before you is named He Bin.
+He was a key interpreter in the Anping area, responsible for communicating and mediating between different groups—someone who would normally be hard to ignore.
+But now, he is on the run.
+
+Judging from the scattered letters and notices in the room, it is not a private dispute chasing him, but the Dutch East India Company (VOC)—the massive power that controlled the port, trade, and could even dictate a person's fate at the time.
+You recall from history textbooks that He Bin worked for the VOC but later fell out with them, partly over debt issues. It seems this is exactly that event.
+
+But strangely, he clearly does not belong to this era, yet he appeared right in front of your eyes and is heading away from the town.
+A thought crosses your mind: If you let him go now, you might never know the truth.
+
+So, you decide to follow him.`
+        },
         minigameType: 'dragdrop'
     },
     street: {
