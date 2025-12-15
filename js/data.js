@@ -2,14 +2,33 @@
 // 定義預期會用到的檔案路徑
 export const LOCATIONS = {
     fort: {
-        id: 'fort', title: '海山館周遭',
+        id: 'fort', title: '何斌的住家',
         video: 'assets/pano_fort.mp4',
         audio_zh: 'assets/voice_fort_zh.mp3',
         audio_en: 'assets/voice_fort_en.mp3',
         thumb: 'assets/thumb_fort.jpg',
         puzzle: {
-            zh: "散落的文書中，必須拼湊出原本的模樣。",
-            en: "Piece together the scattered documents.",
+            zh: `你依照地圖的指引，來到安平老街的一處老屋。
+羅盤微微震動，空氣像是被拉開了一道縫隙。
+
+你看到一名穿著異樣服飾的男子正匆忙地在屋內翻找物品。
+他神情緊張，動作急促，
+不時望向門口，彷彿在躲避什麼人。
+
+你聽見他低聲咒罵：
+「他們不可能放過我……，看來只能趕快投靠國姓爺了……」
+
+你正在思考時，這個人快速的與你擦身而過。你們對望一眼，他沒做過多停留就離開了。`,
+            en: `Following the map's guidance, you arrive at an old house on Anping Old Street.
+The compass vibrates slightly, as if a rift has opened in the air.
+
+You see a man in strange attire hurriedly rummaging through the house.
+He looks nervous, moving frantically, glancing at the door as if evading someone.
+
+You hear him curse under his breath:
+"They won't let me go... I must seek refuge with Koxinga at once..."
+
+Lost in thought, the man brushes past you. You lock eyes for a second, but he leaves without hesitation.`,
             answer: "1624",
             successMsg: "文書拼湊完成，歷史的開端是 1624。"
         },
@@ -61,7 +80,7 @@ export const LOCATIONS = {
         minigameType: 'slider'
     },
     sunset: {
-        id: 'sunset', title: '妙壽宮',
+        id: 'sunset', title: '市鎮醫院',
         video: 'assets/pano_sunset.mp4',
         audio_zh: 'assets/voice_sunset_zh.mp3',
         audio_en: 'assets/voice_sunset_en.mp3',

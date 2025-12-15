@@ -10,19 +10,65 @@
 
 <body>
 
-    <div id="map-container">
+    <div id="intro-screen">
+        <div class="intro-text-container" style="max-width: 800px; width: 90%; text-align: left; line-height: 1.8;">
+            <p class="story-line">你從未想過，一張泛黃的地圖，竟會改變你對這座城市的記憶。</p>
+            <p class="story-line">那天，你只是在老屋清理堆疊的紙箱，卻在一疊舊報紙之下，發現了一張奇怪的手繪地圖。</p>
+            <p class="story-line">
+                它看起來像是某種旅遊導覽，但標示的卻不是你熟悉的安平。地圖上標出五個地點，有些模糊、有些被反覆塗改，甚至還用針筆刻畫過痕跡。每個地點旁都畫著難以辨識的符號，有點像是印章，又像是一種你從沒見過的…時代標記。
+            </p>
+            <div class="story-line"
+                style="margin: 20px 0; padding-left: 20px; border-left: 3px solid var(--primary-color);">
+                你翻到地圖背面，貼著一張年代久遠的紙條，字跡有些褪色：<br><br>
+                「歷史，不會自己說話。<br>
+                它只會在被遺忘之前，把真相藏給願意尋找的人。<br>
+                這裡，藏著五段被抹去的記憶。<br>
+                若你願意，就從這裡開始。」
+            </div>
+            <p class="story-line">你愣了一會兒。出於好奇，你掃描了地圖角落那個幾乎要消失的QR
+                Code，畫面亮起，一個名為「記憶地圖」的線上平台自動載入。五個景點在虛擬地圖上閃爍，每一個都能點擊、環視、探索——</p>
+            <p class="story-line">你打開了第一個地點，開始進入這個未知的冒險。</p>
+        </div>
+        <button id="skip-btn" onclick="skipIntro()">跳過動畫 >></button>
+        <button id="start-btn" onclick="enterGame()">開始尋找</button>
+    </div>
+
+    <!-- Mute Button (Global) -->
+    <button id="global-mute-btn" onclick="toggleMute()">🔊</button>
+
+    <div id="map-container" class="hidden">
         <div class="map-title">
             <h1>記憶地圖</h1>
             <p>點擊碎片，進入被遺忘的歷史</p>
         </div>
         <div class="map-grid">
-            <div style="grid-column: 2;" class="map-piece" id="pin-fort">海山館</div>
+            <div style="grid-column: 2;" class="map-piece" id="pin-fort">何斌的住家</div>
             <div class="map-piece" id="pin-street">文朱殿</div>
             <div class="map-piece" id="pin-treehouse">考古埕</div>
             <div class="map-piece" id="pin-tait">劍獅</div>
-            <div style="grid-column: 2;" class="map-piece" id="pin-sunset">妙壽宮</div>
+            <div style="grid-column: 2;" class="map-piece" id="pin-sunset">市鎮醫院</div>
         </div>
-        <button class="btn-retro" style="margin-top: 30px;" onclick="GameManager.resetProgress()">重置進度 (Debug)</button>
+        <div class="button-group" style="margin-top: 30px; display: flex; gap: 15px;">
+            <button class="btn-retro"
+                onclick="document.getElementById('instruction-overlay').classList.remove('hidden')">📖 遊戲玩法簡介</button>
+            <button class="btn-retro" onclick="GameManager.resetProgress()">重置進度 (Debug)</button>
+        </div>
+    </div>
+
+    <!-- Instruction Overlay -->
+    <div id="instruction-overlay" class="hidden">
+        <div class="instruction-box">
+            <span class="close-btn"
+                onclick="document.getElementById('instruction-overlay').classList.add('hidden')">×</span>
+            <h2>遊戲玩法簡介</h2>
+            <div class="instruction-content">
+                <p>本次遊戲將搭配專屬建置的線上環景系統，讓玩家如同走進時空的入口，透過視覺與互動體驗，展開一場跨越五個歷史時代的記憶尋寶之旅。</p>
+                <p>玩家將從一張神秘的「記憶地圖」開始，地圖上標示了五個不尋常的地點。透過環景系統，玩家可點選地圖上圖標，進入虛擬場景中進行實地探索，彷彿置身於安平街區與歷史現場。</p>
+                <p>每一個場景中皆設有專屬的故事線索與謎題任務，玩家需觀察場景細節、破解提示，完成五道挑戰。每解開一個謎題，即可獲得一塊「記憶線索碎片」。</p>
+                <p>當五片碎片全部集齊後，玩家將解鎖地圖中心最終座標──「考古埕」，也正是這段記憶旅程的真相所在。<br>
+                    前往現場後，將開啟後續的實體沉浸式任務，進一步揭開歷史深處的謎團。</p>
+            </div>
+        </div>
     </div>
 
     <div id="game-view" class="hidden">
@@ -91,6 +137,50 @@
         }
     </script>
     <script type="module" src="js/game.js"></script>
+    <script>
+        function enterGame() {
+            var intro = document.getElementById('intro-screen');
+            var map = document.getElementById('map-container');
+            if (intro && map) {
+                intro.classList.add('hidden');
+                map.classList.remove('hidden');
+            }
+            // Attempt to play music
+            var bgMusic = document.getElementById('bg-music');
+            if (bgMusic) {
+                bgMusic.play().catch(function (e) { console.log("Audio autoplay prevented"); });
+            }
+        }
+
+        function toggleMute() {
+            var bgMusic = document.getElementById('bg-music');
+            var btn = document.getElementById('global-mute-btn');
+            if (bgMusic) {
+                bgMusic.muted = !bgMusic.muted;
+                btn.innerText = bgMusic.muted ? "🔇" : "🔊";
+            }
+        }
+
+        function skipIntro() {
+            // Force show all text details immediately
+            var lines = document.querySelectorAll('.story-line');
+            lines.forEach(function (line) {
+                line.style.animation = 'none';
+                line.style.opacity = '1';
+            });
+
+            var btn = document.getElementById('start-btn');
+            var skipBtn = document.getElementById('skip-btn');
+
+            if (btn) {
+                btn.style.animation = 'none';
+                btn.style.opacity = '1';
+            }
+            if (skipBtn) {
+                skipBtn.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 
 </html>

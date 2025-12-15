@@ -159,49 +159,104 @@ window.GameManager = {
     }
 };
 
-// --- Audio Manager ---
+// --- Audio Manager (Web Speech API) ---
 window.AudioManager = {
-    currentAudio: null,
+    voices: [],
+
+    init() {
+        // Pre-load voices because getVoices() is async in Chrome
+        const loadVoices = () => {
+            this.voices = window.speechSynthesis.getVoices();
+            console.log(`Loaded ${this.voices.length} voices`);
+        };
+
+        loadVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+        }
+    },
 
     playVoice(lang) {
         const id = GameManager.currentLocationId;
         if (!id) return;
 
-        const src = lang === 'zh' ? LOCATIONS[id].audio_zh : LOCATIONS[id].audio_en;
-        if (!src) { alert("此語言尚無語音 / No audio for this language"); return; }
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
 
-        if (this.currentAudio) this.currentAudio.pause();
+        const data = LOCATIONS[id];
+        const text = lang === 'zh' ? data.puzzle.zh : data.puzzle.en;
 
-        // Ducking volume of video if exists
+        if (!text) {
+            alert("沒有可朗讀的文字 / No text to read");
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Robust Voice Selection
+        if (this.voices.length === 0) {
+            this.voices = window.speechSynthesis.getVoices();
+        }
+
+        let selectedVoice = null;
+        if (lang === 'zh') {
+            // Try explicit zh-TW voices first, then any Chinese
+            selectedVoice = this.voices.find(v => v.lang === 'zh-TW') ||
+                this.voices.find(v => v.lang.includes('zh')) ||
+                this.voices.find(v => v.name.includes('Chinese') || v.name.includes('Taiwan'));
+            utterance.lang = 'zh-TW';
+        } else {
+            selectedVoice = this.voices.find(v => v.lang === 'en-US') ||
+                this.voices.find(v => v.lang.startsWith('en'));
+            utterance.lang = 'en-US';
+        }
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            console.log("Using voice:", selectedVoice.name);
+        } else {
+            console.warn("No specific voice found for", lang, "using system default.");
+        }
+
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+
+        // Volume Ducking
         const video = document.getElementById('video-player');
-        if (!video.paused) video.volume = 0.2;
+        const bgMusic = document.getElementById('bg-music');
 
-        this.currentAudio = new Audio(src);
-
-        // Add error handling for audio
-        this.currentAudio.onerror = () => {
-            alert(`⚠️ 播放失敗 (Missing Audio)\n找不到檔案: ${src}`);
-            if (!video.paused) video.volume = 1.0;
+        utterance.onstart = () => {
+            console.log("Speech started");
+            if (video) video.volume = 0.1;
+            if (bgMusic) bgMusic.volume = 0.1;
         };
 
-        this.currentAudio.play().catch(e => {
-            // Interactions required sometimes
-            console.log("Audio play prevented");
-        });
-
-        this.currentAudio.onended = () => {
-            if (!video.paused) video.volume = 1.0;
-            this.currentAudio = null;
+        const restoreVolume = () => {
+            console.log("Speech ended/stopped");
+            if (video) video.volume = 1.0;
+            if (bgMusic) bgMusic.volume = 0.5;
         };
+
+        utterance.onend = restoreVolume;
+        utterance.onerror = (e) => {
+            console.error("Speech synthesis error:", e);
+            restoreVolume();
+        };
+
+        window.speechSynthesis.speak(utterance);
     },
 
     stop() {
-        if (this.currentAudio) {
-            this.currentAudio.pause();
-            this.currentAudio = null;
-        }
+        window.speechSynthesis.cancel();
+        const video = document.getElementById('video-player');
+        const bgMusic = document.getElementById('bg-music');
+        if (video) video.volume = 1.0;
+        if (bgMusic) bgMusic.volume = 0.5;
     }
 };
+
+// Initiate voice loading immediately
+window.AudioManager.init();
 
 // --- Mini-Game Manager (The New Feature) ---
 window.MiniGameManager = {
@@ -412,4 +467,12 @@ const ThreeEngine = {
 window.onload = () => {
     GameManager.init();
     ThreeEngine.init();
+};
+
+window.enterGame = function () {
+    document.getElementById('intro-screen').classList.add('hidden');
+    document.getElementById('map-container').classList.remove('hidden');
+    // Start music if needed, or wait for interaction
+    const bgMusic = document.getElementById('bg-music');
+    bgMusic.play().catch(e => console.log("Audio autoplay prevented"));
 };
